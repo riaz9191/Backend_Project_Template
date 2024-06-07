@@ -13,8 +13,16 @@ const getAllProducts = async () => {
 };
 
 const getProductById = async (productId: string) => {
-  const result = await Product.findById(productId);
-  return result;
+  try {
+    const result = await Product.findById(productId);
+    if (!result) {
+      throw new Error('Product not found');
+    }
+    return result;
+  } catch (error) {
+    console.error('Error fetching product by ID:', error);
+    throw error;
+  }
 };
 
 const updateProduct = async (productId: string, payload: Partial<TProduct>) => {
@@ -28,7 +36,6 @@ const deleteProduct = async (productId: string) => {
 
 const searchProducts = async (searchTerm: string) => {
   const regex = new RegExp(searchTerm, 'i'); // 'i' makes it case-insensitive
-  console.log(`Searching for: ${searchTerm}`); // Debug log
   const result = await Product.find({
     $or: [
       { name: { $regex: regex } },
@@ -38,7 +45,6 @@ const searchProducts = async (searchTerm: string) => {
       { 'variants.value': { $regex: regex } },
     ],
   });
-  console.log(`Search result: ${result.length} items found`); // Debug log
   return result;
 };
 
